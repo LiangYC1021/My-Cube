@@ -1,0 +1,23 @@
+// 主函数
+void main()
+{
+	Game P(210, 10), Q(510, 10);
+	P.Init();
+
+	CMD c, d;
+	while (true)
+	{
+		c = P.GetCmd();
+		P.DispatchCmd(c);
+		d = Q.GetCmd();
+		Q.DispatchCmd(d);
+		if (c== CMD_QUIT||d==CMD_QUIT)
+		{
+			HWND wnd = GetHWnd();
+			if (MessageBox(wnd, _T("您要退出游戏吗？"), _T("提醒"), MB_OKCANCEL | MB_ICONQUESTION) == IDOK)
+				P.Quit();
+		}
+	}
+}
+
+//很抱歉我们并没有实现双人版的游戏，暑假会更新此项目！
