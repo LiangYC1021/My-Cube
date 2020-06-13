@@ -1,0 +1,7 @@
+class Game :public Player, public Drawing, public Square {
+public:
+	Game(int a, int b) :Drawing(a, b) {
+	}
+};
+
+//只是一个派生类
