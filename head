@@ -1,0 +1,27 @@
+#include <easyx.h>
+#include <conio.h>
+#include <time.h>
+#include <iostream>
+using namespace std;
+
+//定义游戏区
+#define	WIDTH	17		// 游戏区宽度
+#define	HEIGHT	31		// 游戏区高度
+#define	UNIT	20		// 每个游戏区单位的实际像素
+
+// 定义操作类型
+enum CMD
+{
+	CMD_ROTATE,						// 方块旋转
+	CMD_LEFT, CMD_RIGHT, CMD_DOWN,	// 方块左、右、下移动
+	CMD_SINK,						// 方块沉底
+	CMD_QUIT						// 退出游戏
+};
+
+// 定义绘制方块的方法
+enum DRAW
+{
+	SHOW,	// 显示方块
+	CLEAR,	// 擦除方块
+	FIX		// 固定方块
+};
