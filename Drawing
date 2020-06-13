@@ -1,0 +1,147 @@
+class Drawing {
+public:
+	int x, y;
+	Drawing(int a, int b) {
+		x = a;
+		y = b;
+	}
+	void Init();											// 初始化游戏
+	void Quit();											// 退出游戏
+	void NewGame();											// 开始新游戏
+	void GameOver();										// 结束游戏
+};
+
+//以下为实现
+
+// 初始化游戏
+void Drawing::Init()
+{
+	initgraph(1200, 640);
+	srand((unsigned)time(NULL));
+	setbkcolor(RGB(161, 175, 201));
+	cleardevice();
+	//画线
+	setlinecolor(RGB(61, 225, 174));
+	setlinestyle(PS_SOLID, 4);
+	line(200, 0, 200, 640);
+	line(700, 0, 700, 640);
+	setlinecolor(RGB(163, 226, 197));
+	line(575, 50, 690, 50);
+	line(1075, 50, 1190, 50);
+
+	//设置界面文字
+	LOGFONT f;
+	gettextstyle(&f);
+	f.lfHeight = 20;						// 设置字体高度为 20
+	_tcscpy_s(f.lfFaceName, _T("楷体"));	// 设置字体为“楷体”
+	f.lfQuality = ANTIALIASED_QUALITY;		// 设置输出效果为抗锯齿  
+	settextstyle(&f);						// 设置字体样式
+	settextcolor(RGB(75, 92, 196));
+	outtextxy(20, 330, _T("操作说明"));
+	outtextxy(20, 350, _T("玩家一"));
+	outtextxy(20, 370, _T("W：旋转方块"));
+	outtextxy(20, 390, _T("A：左移方块"));
+	outtextxy(20, 410, _T("D：右移方块"));
+	outtextxy(20, 430, _T("S：下移方块"));
+	outtextxy(20, 480, _T("玩家二"));
+	outtextxy(20, 500, _T("上：旋转方块"));
+	outtextxy(20, 520, _T("左：左移方块"));
+	outtextxy(20, 540, _T("右：右移方块"));
+	outtextxy(20, 560, _T("下：下移方块"));
+
+	//游戏界面文字
+	outtextxy(580, 25, _T("下一个方块"));
+	outtextxy(1080, 25, _T("下一个方块"));
+
+	//设置坐标原点
+	setorigin(x, y);
+
+	// 开始新游戏
+	NewGame();
+}
+
+// 退出游戏
+void Drawing::Quit()
+{
+	closegraph();
+	exit(0);
+}
+
+// 开始新游戏
+void Drawing::NewGame()
+{
+	// 清空游戏区
+	setfillcolor(BLACK);
+	solidrectangle(-3, -3, WIDTH * UNIT + 2, HEIGHT * UNIT + 2);
+	solidrectangle(497, -3, WIDTH * UNIT + 502, HEIGHT * UNIT + 2);
+	setlinecolor(RGB(163, 226, 197));
+	rectangle(-4, -4, 344, 623);
+	rectangle(496, -4, 844, 623);
+	ZeroMemory(g_World, WIDTH * HEIGHT);
+
+	// 生成下一个方块
+	g_NextBlock.id = rand() % 7;
+	g_NextBlock.dir = rand() % 4;
+	g_NextBlock.x = WIDTH + 2;
+	g_NextBlock.y = HEIGHT - 4;
+
+	// 获取新方块
+	Square A;
+	A.NewBlock();
+}
+
+// 结束游戏
+void Drawing::GameOver()
+{
+	HWND wnd = GetHWnd();
+	if (MessageBox(wnd, _T("游戏结束。\n您想重新来一局吗？"), _T("游戏结束"), MB_YESNO | MB_ICONQUESTION) == IDYES)
+		NewGame();
+	else
+		Quit();
+}
+
+// 获取控制命令
+DWORD m_oldtime;
+CMD Player::GetCmd()
+{
+	// 获取控制值
+	while (true)
+	{
+		// 如果超时，自动下落一格
+		DWORD newtime = GetTickCount();
+		if (newtime - m_oldtime >= 500)
+		{
+			m_oldtime = newtime;
+			return CMD_DOWN;
+		}
+
+		// 如果有按键，返回按键对应的功能
+		if (_kbhit())
+		{
+			switch (_getch())
+			{
+			case 'w':
+			case 'W':	return CMD_ROTATE;
+			case 'a':
+			case 'A':	return CMD_LEFT;
+			case 'd':
+			case 'D':	return CMD_RIGHT;
+			case 's':
+			case 'S':	return CMD_DOWN;
+			case 27:	return CMD_QUIT;
+			case ' ':	return CMD_SINK;
+			case 0:
+			case 0xE0:
+				switch (_getch())
+				{
+				case 72:	return CMD_ROTATE;
+				case 75:	return CMD_LEFT;
+				case 77:	return CMD_RIGHT;
+				case 80:	return CMD_DOWN;
+				}
+			}
+		}
+		// 延时 (降低 CPU 占用率)
+		Sleep(20);
+	}
+}
