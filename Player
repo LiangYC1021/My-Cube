@@ -1,0 +1,69 @@
+class Player {
+public:
+	Player() {}
+	CMD  GetCmd();											// 获取控制命令
+	void DispatchCmd(CMD _cmd);								// 分发控制命令
+};
+
+//以下为实现
+
+// 获取控制命令
+DWORD m_oldtime;
+CMD Player::GetCmd()
+{
+	// 获取控制值
+	while (true)
+	{
+		// 如果超时，自动下落一格
+		DWORD newtime = GetTickCount();
+		if (newtime - m_oldtime >= 500)
+		{
+			m_oldtime = newtime;
+			return CMD_DOWN;
+		}
+
+		// 如果有按键，返回按键对应的功能
+		if (_kbhit())
+		{
+			switch (_getch())
+			{
+			case 'w':
+			case 'W':	return CMD_ROTATE;
+			case 'a':
+			case 'A':	return CMD_LEFT;
+			case 'd':
+			case 'D':	return CMD_RIGHT;
+			case 's':
+			case 'S':	return CMD_DOWN;
+			case 27:	return CMD_QUIT;
+			case ' ':	return CMD_SINK;
+			case 0:
+			case 0xE0:
+				switch (_getch())
+				{
+				case 72:	return CMD_ROTATE;
+				case 75:	return CMD_LEFT;
+				case 77:	return CMD_RIGHT;
+				case 80:	return CMD_DOWN;
+				}
+			}
+		}
+		// 延时 (降低 CPU 占用率)
+		Sleep(20);
+	}
+}
+
+// 分发控制命令
+void Player::DispatchCmd(CMD _cmd)
+{
+	Square B;
+	switch (_cmd)
+	{
+	case CMD_ROTATE:	B.OnRotate();	break;
+	case CMD_LEFT:		B.OnLeft();		break;
+	case CMD_RIGHT:		B.OnRight();	break;
+	case CMD_DOWN:		B.OnDown();		break;
+	case CMD_SINK:		B.OnSink();		break;
+	case CMD_QUIT:		break;
+	}
+}
